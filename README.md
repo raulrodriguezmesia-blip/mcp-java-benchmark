@@ -5,7 +5,7 @@ A reproducible, high-performance Java benchmark suite designed to evaluate AI Ag
 [![Build Status](https://img.shields.io/badge/Verification-PASS-success)](https://github.com/raulrodriguezmesia-blip/mcp-java-benchmark)
 [![Java Version](https://img.shields.io/badge/Java-17-blue)](https://pom.xml)
 [![MCP Protocol](https://img.shields.io/badge/MCP-stdio--compliant-orange)](https://modelcontextprotocol.io)
-[![Tag](https://img.shields.io/badge/Release-v1.0.0--passed-brightgreen)](https://github.com/raulrodriguezmesia-blip/mcp-java-benchmark/releases/tag=v1.0.0-passed)
+[![Tag](https://img.shields.io/badge/Release-v1.0.0--passed-brightgreen)](https://github.com/raulrodriguezmesia-blip/mcp-java-benchmark/releases/tag/v1.0.0-passed)
 
 ---
 
@@ -40,7 +40,6 @@ mcp-java-benchmark/
 ├── verifier/
 │   └── verify.sh                      # Deterministic bash test harness
 └── Dockerfile                         # Multi-stage isolated evaluation environment
-
 
 ---
 
