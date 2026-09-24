@@ -80,6 +80,7 @@ public class OrderProcessor {
         return result;
     }
 }
+```
 Execution Time: < 50ms algorithmic processing (244ms total test suite runtime).
 
 Memory Bounds: O(N) auxiliary space with bounded garbage collection pauses.
