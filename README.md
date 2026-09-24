@@ -12,15 +12,16 @@ A reproducible, high-performance Java benchmark suite designed to evaluate AI Ag
 ## Executive Summary
 
 This benchmark evaluates whether an AI Agent can orchestrate MCP tools to:
-1. Inspect a Java codebase (target-codebase) experiencing an O(N^2) performance bottleneck on large dataset deduplication (500,000 records).
-2. Diagnose high latency (>120s timeout) caused by linear lookups on unindexed collections.
-3. Apply a production-grade O(N) refactor using pre-allocated LinkedHashSet capacity.
-4. Execute a deterministic verification harness (verify.sh) to confirm SLA compliance (<500ms).
+* Inspect a Java codebase (`target-codebase`) experiencing an O(N^2) performance bottleneck on large dataset deduplication (500,000 records).
+* Diagnose high latency (>120s timeout) caused by linear lookups on unindexed collections.
+* Apply a production-grade O(N) refactor using pre-allocated `LinkedHashSet` capacity.
+* Execute a deterministic verification harness (`verify.sh`) to confirm SLA compliance (<500ms).
 
 ---
 
 ## Architecture & Components
 
+```text
 mcp-java-benchmark/
 ├── benchmarks/
 │   └── task_01_performance/
