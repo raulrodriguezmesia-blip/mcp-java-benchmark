@@ -42,7 +42,7 @@ mcp-java-benchmark/
 └── Dockerfile                         # Multi-stage isolated evaluation environment
 
 ---
-
+```
 ## Technical Specification: O(N^2) -> O(N) Bottleneck
 
 ### Baseline (Failure State)
