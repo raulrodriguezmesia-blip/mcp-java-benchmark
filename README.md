@@ -113,3 +113,51 @@ Pass@1 Criteria: Code compiles cleanly under JDK 17, passes all functional unit 
 Verification Status: SUCCESS (Exit Code 0, Execution Time: ~9.0s end-to-end including Maven overhead).
 
 Git Version Tag: v1.0.0-passed
+
+## MCP Server v2.0 Extensions
+
+`verifier/smoke_test_mcp.py`
+
+El servidor MCP determinista fue refactorizado con un contrato JSON-RPC 2.0 estricto. Cada llamada devuelve una envoltura JSON unificada:
+
+```json
+{
+  "tool": "read_source_code",
+  "status": "SUCCESS" | "INVALID_INPUT" | "INTERNAL_ERROR",
+  "execution_time_ms": 1.234,
+  "data": { ... } | null,
+  "error_details": { "code": "...", "message": "...", "field": "..." } | null
+}
+```
+
+### Herramientas disponibles
+
+| Herramienta | Parámetros | Descripción |
+| :--- | :--- | :--- |
+| `run_junit_tests` | `tests?` (string, patrón JUnit `-Dtest`) | Ejecuta `mvn -B test` en `target-codebase`. Un fallo del test suite es `SUCCESS` con `return_code != 0`. |
+| `read_source_code` | `file_path` (string, obligatorio, relativo a `target-codebase`) | Lee un archivo UTF-8 (máx 512 KiB). Se rechazan rutas absolutas y `..`. |
+| `apply_code_patch` | `file_path` (string), `new_content` (string) | Crea/ sobrescribe un archivo UTF-8 (máx 1 MiB). Los directorios padres se crean si faltan. |
+| `get_build_errors` | *ninguno* | Ejecuta `mvn -B test` y devuelve solo las líneas de error/fallo (filtrado por marcadores determinista). |
+
+### Contratos de error deterministas
+
+| `status` | `error_details.code` | Semántica |
+| :--- | :--- | :--- |
+| `INVALID_INPUT` | `MISSING_REQUIRED_ARGUMENT` | Faltó un argumento obligatorio. |
+| `INVALID_INPUT` | `TYPE_MISMATCH` / `EMPTY_ARGUMENT` / `ARGUMENT_TOO_LONG` / `INVALID_PATTERN` | El argumento no cumple el JSON Schema. |
+| `INVALID_INPUT` | `PATH_TRAVERSAL` / `MALFORMED_PATH` | `file_path` intenta salir de `target-codebase`. |
+| `INVALID_INPUT` | `FILE_NOT_FOUND` / `NOT_TEXT_FILE` / `FILE_TOO_LARGE` | El archivo no cumple los requisitos de lectura. |
+| `INVALID_INPUT` | `UNEXPECTED_ARGUMENT` | Se pasó un argumento no permitido. |
+| `INTERNAL_ERROR` | `UNKNOWN_TOOL` | El nombre de la herramienta no existe. |
+| `INTERNAL_ERROR` | `COMMAND_NOT_FOUND` / `TIMEOUT` / `UNEXPECTED_EXCEPTION` | Fallo inesperado del entorno (mvn no disponible, exceso de timeout, excepción). |
+
+### Ejecución de la prueba de humo
+
+```bash
+python verifier/smoke_test_mcp.py
+# SMOKE TEST PASSED
+```
+
+El verificador base (`verifier/verify.sh`) se mantiene intacto y sigue ejecutando `mvn test` sobre `target-codebase`, que pasa el 100% de los tests unitarios.
+
+---

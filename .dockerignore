@@ -1,0 +1,10 @@
+# Keep the build context minimal.
+.git
+.kilo
+docs
+benchmarks
+verifier
+mcp-server
+target-codebase/target
+*.log
+*.md

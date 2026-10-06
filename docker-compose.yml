@@ -1,0 +1,57 @@
+# Fase 1 - local cloud-native environment
+#
+#   app        : Java benchmark service (multi-stage image, non-root, JRE 17 Alpine).
+#   mcp-server : deterministic MCP server (Python, stdio transport).
+#   redis      : agent state / cache layer (Redis 7 Alpine).
+#
+# Usage:
+#   docker compose up --build
+#   docker compose run --rm app          # runs the benchmark, exits with JSON summary
+#   docker compose run --rm mcp-server   # idle stdio MCP server (attach a client)
+#
+# The MCP server mounts the local target-codebase so an agent can read/patch
+# source and run the test suite from inside the container.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mcp-java-benchmark:latest
+    environment:
+      BENCHMARK_ORDERS: "100000"
+      BENCHMARK_THREADS: "8"
+    depends_on:
+      - redis
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: "no"
+
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    image: mcp-java-mcp-server:latest
+    environment:
+      TARGET_CODEBASE: /workspace/target-codebase
+      MCP_TIMEOUT_SECONDS: "120"
+    volumes:
+      - ./target-codebase:/workspace/target-codebase
+    restart: "no"
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  redis-data:
