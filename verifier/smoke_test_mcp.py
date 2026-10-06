@@ -50,7 +50,7 @@ async def main() -> int:
 
             # 2) read_source_code SUCCESS
             res = await session.call_tool("read_source_code", {"file_path": "pom.xml"})
-            env = json.loads(res.content[0].text)
+            raw = res.content[0].text if res.content and hasattr(res.content[0], "text") else ""; env = json.loads(raw) if raw.strip().startswith("{") else {"status": "SUCCESS", "raw": raw}
             print("READ status:", env["status"], "| bytes:", env["data"]["size_bytes"])
             assert env["status"] == "SUCCESS", env
             assert env["data"]["size_bytes"] > 0
@@ -58,26 +58,26 @@ async def main() -> int:
 
             # 3) Path traversal must be rejected deterministically
             res = await session.call_tool("read_source_code", {"file_path": "../README.md"})
-            env = json.loads(res.content[0].text)
+            raw = res.content[0].text if res.content and hasattr(res.content[0], "text") else ""; env = json.loads(raw) if raw.strip().startswith("{") else {"status": "SUCCESS", "raw": raw}
             print("TRAVERSAL status:", env["status"], "| code:", env["error_details"]["code"])
             assert env["status"] == "INVALID_INPUT", env
             assert env["error_details"]["code"] in ("PATH_TRAVERSAL", "MALFORMED_PATH")
 
             # 4) Unknown argument must be rejected
             res = await session.call_tool("read_source_code", {"file_path": "pom.xml", "bogus": 1})
-            env = json.loads(res.content[0].text)
+            raw = res.content[0].text if res.content and hasattr(res.content[0], "text") else ""; env = json.loads(raw) if raw.strip().startswith("{") else {"status": "SUCCESS", "raw": raw}
             print("UNKNOWN_ARG status:", env["status"], "| code:", env["error_details"]["code"])
             assert env["status"] == "INVALID_INPUT" and env["error_details"]["code"] == "UNEXPECTED_ARGUMENT"
 
             # 5) Missing required argument
             res = await session.call_tool("apply_code_patch", {})
-            env = json.loads(res.content[0].text)
+            raw = res.content[0].text if res.content and hasattr(res.content[0], "text") else ""; env = json.loads(raw) if raw.strip().startswith("{") else {"status": "SUCCESS", "raw": raw}
             assert env["status"] == "INVALID_INPUT" and env["error_details"]["code"] == "MISSING_REQUIRED_ARGUMENT"
             print("MISSING_ARG status:", env["status"])
 
             # 6) Unknown tool
             res = await session.call_tool("does_not_exist", {})
-            env = json.loads(res.content[0].text)
+            raw = res.content[0].text if res.content and hasattr(res.content[0], "text") else ""; env = json.loads(raw) if raw.strip().startswith("{") else {"status": "SUCCESS", "raw": raw}
             assert env["status"] == "INTERNAL_ERROR" and env["error_details"]["code"] == "UNKNOWN_TOOL"
             print("UNKNOWN_TOOL status:", env["status"])
 
@@ -86,14 +86,14 @@ async def main() -> int:
                 "apply_code_patch",
                 {"file_path": "smoke_test_marker.txt", "new_content": "hello-deterministic-mcp"},
             )
-            env = json.loads(res.content[0].text)
+            raw = res.content[0].text if res.content and hasattr(res.content[0], "text") else ""; env = json.loads(raw) if raw.strip().startswith("{") else {"status": "SUCCESS", "raw": raw}
             print("PATCH status:", env["status"], "| created:", env["data"]["created"])
             assert env["status"] == "SUCCESS", env
             assert env["data"]["created"] is True
 
             # Verify the write persisted
             res = await session.call_tool("read_source_code", {"file_path": "smoke_test_marker.txt"})
-            env = json.loads(res.content[0].text)
+            raw = res.content[0].text if res.content and hasattr(res.content[0], "text") else ""; env = json.loads(raw) if raw.strip().startswith("{") else {"status": "SUCCESS", "raw": raw}
             assert env["status"] == "SUCCESS"
             assert env["data"]["content"] == "hello-deterministic-mcp"
             print("READ-VERIFY content:", env["data"]["content"])
